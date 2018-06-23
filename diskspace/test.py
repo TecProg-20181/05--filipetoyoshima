@@ -1,7 +1,7 @@
 import unittest
 import diskspace
 import subprocess
-import StringIO
+import cStringIO
 import sys
 from mock import patch, MagicMock  
 
@@ -17,6 +17,29 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(diskspace.bytes_to_readable(2048), '1.00Mb')
         self.assertEqual(diskspace.bytes_to_readable(0), '0.00B')
         self.assertEqual(diskspace.bytes_to_readable(999999999), '476.84Gb')
+
+    def test_print_tree(self):
+        stdout_ = sys.stdout
+        output = cStringIO.StringIO()
+        sys.stdout = output
+        file_tree_node = {
+            'children': [],
+            'size': 4,
+            'print_size': '200.00Kb'
+        }
+
+        file_tree = {
+            'some/directory' : file_tree_node
+        }
+
+        diskspace.print_tree(file_tree,
+                             file_tree_node,
+                             'some/directory',
+                             4,
+                             4)
+        expected_output = '200.00Kb  100%  some/directory\n'
+        sys.stdout = stdout_
+        self.assertEqual(expected_output, output.getvalue())
 
 if __name__ == '__main__':
     unittest.main()
